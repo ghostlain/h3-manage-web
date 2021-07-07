@@ -22,7 +22,7 @@ function converToTreeNode(area: API.ParkArea) {
     area.enterChannels.forEach((c) => {
       children.push({
         title: c.channelName,
-        key: `channel_${c.id}`,
+        key: `channel_${c.id || 0}`,
         switcherIcon: <EnterChannelIcon />
       })
     })
@@ -33,35 +33,40 @@ function converToTreeNode(area: API.ParkArea) {
     area.exitChannels.forEach((c) => {
       children.push({
         title: c.channelName,
-        key: `channel_${c.channelName}`,
+        key: `channel_${c.id || 0}`,
         switcherIcon: <ExitChannelIcon />
       })
     })
   }
 
-  const areaNode = {
+  return {
     title: area.areaName,
-    key: `area_${area.id}`,
+    key: `area_${area.id || 0}`,
     switcherIcon,
     children
   };
-
-  return areaNode;
 }
 
 const Parking: React.FC = () => {
   const [tree, setTree] = useState<API.ParkArea[]>()
   const [editable, setEditable] = useState(false)
 
-  useEffect(() => {
-    getParkTree().then(({ data }) => {
-      setTree(data)
-    })
-  })
-
   const changeEditState = () => {
     setEditable(!editable)
   }
+
+  // const onDrop = (info: any) => {
+  //   console.log(info)
+  // }
+
+  useEffect(() => {
+    const fetchTree = async () => {
+      const { data } = await getParkTree();
+      console.log(data)
+      setTree(data);
+    }
+    fetchTree();
+  }, [])
 
   return (
     <PageContainer
@@ -81,6 +86,7 @@ const Parking: React.FC = () => {
               treeData={tree.map((a) => converToTreeNode(a))}
               showLine
               draggable={editable}
+              // onDrop={onDrop}
               defaultExpandAll
             />
           }

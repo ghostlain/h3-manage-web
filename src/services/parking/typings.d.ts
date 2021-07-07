@@ -1,6 +1,6 @@
 declare namespace API {
   type ParkArea = {
-    id: number;
+    id?: number;
     parentId: number;
     parkingId: number;
     areaName: string;
@@ -22,7 +22,7 @@ declare namespace API {
   }
 
   type ParkChannel = {
-    id: number;
+    id?: number;
     channelName: string;
     unattendedMode?: number;
     channelDescription?: string;
