@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ParkingIcon, AreaIcon, EnterChannelIcon, ExitChannelIcon } from '@/components/HongmenIcon'
 import { getParkTree } from '@/services/parking/api'
 import ProCard from '@ant-design/pro-card';
+import styles from './index.less';
 
 function converToTreeNode(area: API.ParkArea) {
   const switcherIcon: JSX.Element = area.areaLevel === 0 ? <ParkingIcon /> : <AreaIcon />;
@@ -62,16 +63,13 @@ const Parking: React.FC = () => {
   useEffect(() => {
     const fetchTree = async () => {
       const { data } = await getParkTree();
-      console.log(data)
       setTree(data);
     }
     fetchTree();
   }, [])
 
   return (
-    <PageContainer
-      content='配置基本参数'
-    >
+    <PageContainer content='配置基本参数'className={styles.main}>
       <ProCard split="vertical">
         <ProCard title="车场结构" colSpan="30%"
           extra={

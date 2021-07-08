@@ -47,6 +47,12 @@
         icon: 'smile',
         component: './Parking',
       },
+      {
+        name: '设备管理',
+        icon: 'smile',
+        path: '/basic-config/equipment',
+        component: './Equipment',
+      },
     ],
   },
   {
