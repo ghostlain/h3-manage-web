@@ -52,4 +52,5 @@ export default {
 
   'menu.basic-config': '车场配置',
   'menu.basic-config.parking': '车场结构',
+  'menu.basic-config.equipment': '设备管理',
 };
