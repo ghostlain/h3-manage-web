@@ -3,7 +3,7 @@
 import { request } from 'umi';
 
 export async function getParkTree() {
-  return request<{data: API.ParkArea[]}>('/api/parking/get', {
+  return request<{data: API.AreaNode[]}>('/api/parking/get', {
     method: 'GET'
   })
 }

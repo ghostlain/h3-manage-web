@@ -5,7 +5,7 @@ declare namespace API {
     parkingId: number;
     areaName: string;
     areaLevel: number;
-    areaType: number;
+    areaType: AreaType;
     whetherCharge: boolean;
     temporaryQuantities: number;
     fixedQuantities: number;
@@ -31,5 +31,26 @@ declare namespace API {
     createUser: string;
     lastUpdateTime: string;
     lastUpdateUser: string;
+  }
+
+  enum AreaType {
+    ParkingLot = 1,
+    OuterArea,
+    InnerArea
+  }
+
+  type ChannelNode = {
+    id: number;
+    channelName: string;
+  }
+
+  export type AreaNode = {
+    id: number;
+    parentId: number;
+    areaName: string;
+    areaType: AreaType;
+    areas?: AreaNode[];
+    enterChannels?: ChannelNode[];
+    exitChannels?: ChannelNode[];
   }
 }
