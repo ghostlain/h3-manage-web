@@ -7,3 +7,9 @@ export async function getParkTree() {
     method: 'GET'
   })
 }
+
+export async function getArea(id: string) {
+  return request<{data: API.ParkArea}>('/api/parking/area/' + id, {
+    method: 'GET'
+  })
+}

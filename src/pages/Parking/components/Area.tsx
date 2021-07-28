@@ -1,17 +1,31 @@
 import ProDescriptions from "@ant-design/pro-descriptions";
 import moment from 'moment';
 import { Button, Form } from "antd";
+import { useEffect } from "react";
+import { getArea } from "@/services/parking/api";
+import { useState } from "react";
 
 export type AreaShowProps = {
-    areaId?: number
+    areaId: string
 }
 
 const AreaShow: React.FC<AreaShowProps> = (props) => {
     const [form] = Form.useForm();
+    const [area, setArea] = useState<API.ParkArea>()
 
     const onReset = () => {
         form.resetFields();
     };
+
+    useEffect(() => {
+        const fetch = async () => {
+            const { data } = await getArea(props.areaId)
+            setArea(data);
+        }
+       
+        fetch()
+
+    }, [props.areaId]) 
 
     return (
         <ProDescriptions
@@ -30,7 +44,7 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
                 </Button>
             </ProDescriptions.Item>
             <ProDescriptions.Item label="文本">
-                这是一段很长很长超级超级长的无意义说明文本并且重复了很多没有意义的词语，就是为了让它变得很长很长超级超级长
+                {JSON.stringify(area)}
             </ProDescriptions.Item>
             <ProDescriptions.Item label="金额" tooltip="仅供参考，以实际为准" valueType="money">
                 100

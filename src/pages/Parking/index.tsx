@@ -111,7 +111,7 @@ const Parking: React.FC = () => {
         <ProCard>
           {right && (
             right.type === 'area' ? (
-              <AreaShow areaId={0} />
+              <AreaShow areaId={right.id} />
             ) : (
               <span>Wait!</span>
             )

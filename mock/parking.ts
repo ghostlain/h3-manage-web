@@ -79,10 +79,12 @@ const areas = {
 }
 
 export default {
-  'GET /api/parking/get':  (req: Request, res: Response) => {
+  'GET /api/parking/get': (req: Request, res: Response) => {
     res.send({
       data: Park
     })
   },
-  'GET /api/parking/area/1': areas[1],
+  'GET /api/parking/area/1': {
+    data: areas[1],
+  },
 }
