@@ -1,15 +1,16 @@
-import { PageContainer } from '@ant-design/pro-layout';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { Tree, Button } from 'antd';
+import type { Key } from 'react';
 import React, { useState, useEffect } from 'react';
 import { ParkingIcon, AreaIcon, EnterChannelIcon, ExitChannelIcon } from '@/components/HongmenIcon';
 import { getParkTree } from '@/services/parking/api';
 import ProCard from '@ant-design/pro-card';
-import styles from './index.less';
 import { PlusOutlined } from '@ant-design/icons';
 import { AreaShow } from './components/Area';
+import type { DataNode, EventDataNode } from 'antd/lib/tree';
 
 function converToTreeNode(area: API.AreaNode) {
-  const switcherIcon: JSX.Element = area.areaType === API.AreaType.ParkingLot ?
+  const switcherIcon: JSX.Element = area.areaType === 1 ?
     <ParkingIcon /> : <AreaIcon />; // 子区域
   const subAreas = area.areas;
   const children: any[] = [];
@@ -50,13 +51,15 @@ function converToTreeNode(area: API.AreaNode) {
   };
 }
 
+type RightContent = {
+  type: 'channel' | 'area',
+  id: string
+}
+
+
 const Parking: React.FC = () => {
   const [tree, setTree] = useState<API.AreaNode[]>();
-  const [editable, setEditable] = useState(false);
-
-  const changeEditState = () => {
-    setEditable(!editable);
-  };
+  const [right, setRight] = useState<RightContent>();
 
   useEffect(() => {
     const fetchTree = async () => {
@@ -67,39 +70,55 @@ const Parking: React.FC = () => {
     fetchTree();
   }, []);
 
+  const onSelect = (selectedKeys: Key[], info: {
+    event: 'select';
+    selected: boolean;
+    node: EventDataNode;
+    selectedNodes: DataNode[];
+    nativeEvent: MouseEvent;
+  }): void => {
+    const { node } = info;
+    const [sType, id] = node.key.toString().split('_')
+    if (sType === 'channel' || sType === 'area') {
+      setRight({
+        type: sType,
+        id
+      })
+    }
+  };
+
   return (
-    <PageContainer content="配置基本参数" className={styles.main}>
-      <ProCard split="vertical">
+    <PageHeaderWrapper content="配置基本参数">
+      <ProCard split="vertical" style={{
+        minHeight: '500px'
+      }}>
         <ProCard
           title="车场结构"
           colSpan="30%"
-          extra={
-            <div>
-              <Button type="link" onClick={changeEditState}>
-                {editable ? '取消' : '编辑'}
-              </Button>
-            </div>
-          }
         >
           {tree ? (
             <Tree
               treeData={tree.map(a => converToTreeNode(a))}
               showLine
-              draggable={editable} // onDrop={onDrop}
               defaultExpandAll
+              onSelect={onSelect}
             />
           ) : (
             <Button type="primary"> <PlusOutlined />新增停车场</Button>
           )
           }
         </ProCard>
-        <ProCard title="{左右分栏子卡片带标题}" headerBordered>
-          <div>
-            <AreaShow areaId={0} />
-          </div>
+        <ProCard>
+          {right && (
+            right.type === 'area' ? (
+              <AreaShow areaId={0} />
+            ) : (
+              <span>Wait!</span>
+            )
+          )}
         </ProCard>
       </ProCard>
-    </PageContainer>
+    </PageHeaderWrapper>
   );
 };
 

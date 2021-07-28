@@ -1,4 +1,4 @@
-// import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 
 const Park = [
   {
@@ -79,6 +79,10 @@ const areas = {
 }
 
 export default {
-  'GET /api/parking/get': Park,
+  'GET /api/parking/get':  (req: Request, res: Response) => {
+    res.send({
+      data: Park
+    })
+  },
   'GET /api/parking/area/1': areas[1],
 }

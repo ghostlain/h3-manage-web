@@ -35,8 +35,8 @@ declare namespace API {
 
   enum AreaType {
     ParkingLot = 1,
-    OuterArea,
-    InnerArea
+    OuterArea = 2,
+    InnerArea = 3
   }
 
   type ChannelNode = {
