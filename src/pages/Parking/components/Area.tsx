@@ -6,7 +6,8 @@ import { getArea } from "@/services/parking/api";
 import { useState } from "react";
 
 export type AreaShowProps = {
-    areaId: string
+    areaId: string,
+    onChanged: () => void
 }
 
 const AreaShow: React.FC<AreaShowProps> = (props) => {
@@ -22,10 +23,10 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
             const { data } = await getArea(props.areaId)
             setArea(data);
         }
-       
+
         fetch()
 
-    }, [props.areaId]) 
+    }, [props.areaId])
 
     return (
         <ProDescriptions
@@ -43,11 +44,23 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
                     提交
                 </Button>
             </ProDescriptions.Item>
-            <ProDescriptions.Item label="文本">
-                {JSON.stringify(area)}
+            <ProDescriptions.Item label="区域类型" valueType="select" valueEnum={{
+                1: { text: '停车场' },
+                2: { text: '外区域' },
+                3: { text: '内区域' },
+            }} editable={false}>
+                {area?.areaType}
             </ProDescriptions.Item>
-            <ProDescriptions.Item label="金额" tooltip="仅供参考，以实际为准" valueType="money">
-                100
+            <ProDescriptions.Item label="区域名称" formItemProps={{
+                rules: [
+                    {
+                        required: true,
+                        whitespace: true,
+                        message: '此项是必填项',
+                    },
+                ],
+            }} valueType="text">
+                {area?.areaName}
             </ProDescriptions.Item>
             <ProDescriptions.Item label="百分比" valueType="percent"
                 formItemProps={{

@@ -70,6 +70,11 @@ const Parking: React.FC = () => {
     fetchTree();
   }, []);
 
+  const refreshTree = async () => {
+    const { data } = await getParkTree();
+    setTree(data);
+  }
+
   const onSelect = (selectedKeys: Key[], info: {
     event: 'select';
     selected: boolean;
@@ -111,7 +116,7 @@ const Parking: React.FC = () => {
         <ProCard>
           {right && (
             right.type === 'area' ? (
-              <AreaShow areaId={right.id} />
+              <AreaShow areaId={right.id} onChanged={refreshTree}/>
             ) : (
               <span>Wait!</span>
             )
