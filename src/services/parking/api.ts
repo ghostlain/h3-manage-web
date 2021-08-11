@@ -8,7 +8,7 @@ export async function getParkTree() {
   })
 }
 
-export async function getAreaById(id: string) {
+export async function getAreaById(id: number) {
   return request<API.ApiResponse<API.ParkArea>>(`/api/parking/area/${id}`, {
     method: 'GET'
   })
@@ -22,7 +22,7 @@ export async function addArea(area: any) {
   })
 }
 
-export async function updateArea(id: string, area: any) {
+export async function updateArea(id: number, area: any) {
   return request<API.ApiResponse<any>>(`/api/parking/area/${id}`, {
     method: 'POST',
     requestType: 'json',
@@ -30,7 +30,7 @@ export async function updateArea(id: string, area: any) {
   })
 }
 
-export async function deleteAreaById(id: string) {
+export async function deleteAreaById(id: number) {
   return request<API.ApiResponse<any>>(`/api/parking/area/${id}`, {
     method: 'DELETE'
   })

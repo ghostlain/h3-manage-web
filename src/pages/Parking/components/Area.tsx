@@ -6,12 +6,12 @@ import { useState } from "react";
 import styles from '../index.less'
 import { Access, useAccess, useIntl } from "umi";
 import { PlusOutlined } from "@ant-design/icons";
-import { AreaIcon, EnterChannelIcon, ExitChannelIcon } from "@/components/HongmenIcon";
+import { AreaIcon, EnterChannelIcon, ExitChannelIcon, ParkingIcon } from "@/components/HongmenIcon";
 import AreaAddModel from "./AreaAddModel";
 
 export type AreaShowProps = {
-  areaId: string,
-  onChanged: (id: string, type: ChangedType) => void
+  areaId: number,
+  onChanged: (id: number, type: ChangedType) => void
 }
 
 export type ChangedType = 'deleted' | 'updated' | 'addNewArea' | 'addNewChannel';
@@ -131,9 +131,28 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
             <Button type="link" danger onClick={onDelete}>删除</Button>
             <Dropdown trigger={['click']} placement="bottomRight" overlay={(
               <Menu>
-                <Menu.Item key="1" icon={<AreaIcon />}><AreaAddModel parentId={props.areaId} title="子区域"/></Menu.Item>
-                <Menu.Item key="2" icon={<EnterChannelIcon />}>入口通道</Menu.Item>
-                <Menu.Item key="3" icon={<ExitChannelIcon />}>出口通道</Menu.Item>
+                <Menu.Item key="1" icon={<AreaIcon />}>
+                  <AreaAddModel title={(
+                    <><span style={{ color: '#92C110' }}>{area?.areaName}</span>的子区域</>
+                  )} trigger={<span>子区域</span>} parentId={props.areaId} />
+                </Menu.Item>
+                {area?.areaType === 1 ? (
+                  // 停车场
+                  <Menu.Item key="4" icon={<ParkingIcon />}>
+                    <AreaAddModel title={(
+                      <><span style={{ color: '#92C110' }}>{area?.areaName}</span>的平级停车场</>
+                    )} trigger={<span>平级停车场</span>} parentId={area?.parentId || 0} /></Menu.Item>
+                ) : (
+                  // 区域
+                  <>
+                    <Menu.Item key="2" icon={<EnterChannelIcon />}>入口通道</Menu.Item>
+                    <Menu.Item key="3" icon={<ExitChannelIcon />}>出口通道</Menu.Item>
+                    <Menu.Item key="5" icon={<AreaIcon />}>
+                      <AreaAddModel title={(
+                        <><span style={{ color: '#92C110' }}>{area?.areaName}</span>的平级区域</>
+                      )} trigger={<span>平级区域</span>} parentId={area?.parentId || 0}/></Menu.Item>
+                  </>
+                )}
               </Menu>
             )}><Button type="primary" icon={<PlusOutlined />} style={{ backgroundColor: '#92C110', borderColor: '#92C110' }}></Button></Dropdown>
           </Space>

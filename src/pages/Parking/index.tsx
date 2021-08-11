@@ -52,7 +52,7 @@ function converToTreeNode(area: API.AreaNode) {
 
 type RightContent = {
   type: 'channel' | 'area',
-  id: string
+  id: number
 }
 
 
@@ -86,7 +86,7 @@ const Parking: React.FC = () => {
     if (sType === 'channel' || sType === 'area') {
       setRight({
         type: sType,
-        id
+        id: parseInt(id)
       })
     }
   };
