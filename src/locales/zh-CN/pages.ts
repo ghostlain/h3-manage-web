@@ -64,4 +64,14 @@ export default {
   'pages.searchTable.tenThousand': '万',
   'pages.searchTable.batchDeletion': '批量删除',
   'pages.searchTable.batchApproval': '批量审批',
+
+  // 车场结构管理
+  'pages.parking.title': '配置基本参数',
+  'pages.parking.tree.title': '车场结构',
+
+  'pages.parking.area.title': '区域描述',
+  'pages.parking.loadAreaException': '加载区域信息失败',
+  'pages.parking.saveArea.success': '保存成功',
+  'pages.parking.saveArea.exception': '保存失败',
+
 };

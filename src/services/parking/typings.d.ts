@@ -6,7 +6,7 @@ declare namespace API {
     areaName: string;
     areaLevel: number;
     areaType: AreaType;
-    whetherCharge: boolean;
+    whetherCharge: string;
     temporaryQuantities: number;
     fixedQuantities: number;
     specialQuantities: number;

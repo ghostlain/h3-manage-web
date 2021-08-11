@@ -5,6 +5,7 @@ import pwa from './zh-CN/pwa';
 import settingDrawer from './zh-CN/settingDrawer';
 import settings from './zh-CN/settings';
 import pages from './zh-CN/pages';
+import terminology from './zh-CN/terminology';
 
 export default {
   'navBar.lang': '语言',
@@ -15,6 +16,11 @@ export default {
   'app.preview.down.block': '下载此页面到本地项目',
   'app.welcome.link.fetch-blocks': '获取全部区块',
   'app.welcome.link.block-list': '基于 block 开发，快速构建标准页面',
+  // --------------
+  'common.submit': '提交',
+  'common.delete': '删除',
+  'common.save': '保存',
+  'common.cancel': '取消',
   ...pages,
   ...globalHeader,
   ...menu,
@@ -22,4 +28,6 @@ export default {
   ...settings,
   ...pwa,
   ...component,
+  // 停车场术语
+  ...terminology,
 };

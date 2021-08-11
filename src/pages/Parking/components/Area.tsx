@@ -1,129 +1,206 @@
 import ProDescriptions from "@ant-design/pro-descriptions";
-import moment from 'moment';
-import { Button, Form } from "antd";
+import { Button, Dropdown, Form, Menu, message, Space } from "antd";
 import { useEffect } from "react";
-import { getArea } from "@/services/parking/api";
+import { deleteAreaById, getAreaById, updateArea } from "@/services/parking/api";
 import { useState } from "react";
+import styles from '../index.less'
+import { Access, useAccess, useIntl } from "umi";
+import { PlusOutlined } from "@ant-design/icons";
+import { AreaIcon, EnterChannelIcon, ExitChannelIcon } from "@/components/HongmenIcon";
+import AreaAddModel from "./AreaAddModel";
 
 export type AreaShowProps = {
-    areaId: string,
-    onChanged: () => void
+  areaId: string,
+  onChanged: (id: string, type: ChangedType) => void
+}
+
+export type ChangedType = 'deleted' | 'updated' | 'addNewArea' | 'addNewChannel';
+
+const DescLabel: React.FC<{ title: string }> = (props) => {
+  return (
+    <span className={styles.descLabel}>{props.title}</span>
+  )
 }
 
 const AreaShow: React.FC<AreaShowProps> = (props) => {
-    const [form] = Form.useForm();
-    const [area, setArea] = useState<API.ParkArea>()
+  const [area, setArea] = useState<API.ParkArea>();
+  const [loading, setLoading] = useState<boolean>(true);
 
-    const onReset = () => {
-        form.resetFields();
-    };
+  const [editable, setEditable] = useState<boolean>(false);
+  const [form] = Form.useForm();
+  const access = useAccess();
 
-    useEffect(() => {
-        const fetch = async () => {
-            const { data } = await getArea(props.areaId)
-            setArea(data);
-        }
+  const intl = useIntl();
 
-        fetch()
+  useEffect(() => {
+    const fetch = async () => {
+      setLoading(true);
+      try {
+        const { data } = await getAreaById(props.areaId);
+        setArea(data);
+      } catch (error) {
+        message.error(`加载区域信息失败${error}`)
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetch();
+  }, [props.areaId])
 
-    }, [props.areaId])
+  // 更改列表显示状态
+  const changeEditable = () => {
+    if (editable) {
+      setEditable(false);
+      form.resetFields();
+    } else {
+      setEditable(true);
+    }
+  }
 
-    return (
-        <ProDescriptions
-            formProps={{
-                onValuesChange: (e, f) => console.log(f),
+  // 刷新显示区域
+  const doRefresh = async () => {
+    setLoading(true);
+    try {
+      const { data } = await getAreaById(props.areaId);
+      setArea(data);
+    } catch (error) {
+      message.error(intl.formatMessage({ id: 'pages.parking.loadAreaException', defaultMessage: '加载区域信息失败' }) + error)
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 提交区域更新
+  const onSubmit = async () => {
+    const values = form.getFieldsValue();
+    try {
+      const { areaId } = props;
+      const response = await updateArea(areaId, { ...values });
+      if (response.code === 0) {
+        message.success(intl.formatMessage({ id: 'pages.parking.saveArea.success', defaultMessage: '保存成功' }));
+        // 刷新显示
+        changeEditable();
+        doRefresh();
+        props.onChanged(areaId, 'updated');
+        return;
+      }
+      message.error(intl.formatMessage({ id: 'pages.parking.saveArea.exception', defaultMessage: '保存失败' }) + (response.msg || ''));
+    } catch (err) {
+      message.error(intl.formatMessage({ id: 'pages.parking.saveArea.exception', defaultMessage: '保存失败' }) + err)
+    }
+  }
+
+  // 删除区域
+  const onDelete = async () => {
+    try {
+      const { areaId } = props;
+      const response = await deleteAreaById(areaId)
+      if (response.code === 0) {
+        message.error('删除区域成功!');
+        props.onChanged(areaId, 'deleted');
+        return;
+      }
+      message.error(`删除区域失败!${response.msg}`);
+    } catch (error) {
+      message.error(`删除区域失败!${error}`);
+    }
+  }
+
+  return (
+    <ProDescriptions
+      editable={editable ? {
+        form,
+        editableKeys: ['areaName', 'whetherCharge', 'temporaryQuantities', 'fixedQuantities', 'specialQuantities'],
+        actionRender: () => [],
+      } : undefined}
+      column={1}
+      loading={loading}
+      title="区域描述"
+      dataSource={area}
+      extra={
+        <Access accessible={access.hasAuthority('parking.modify')}>
+          <Space size="small">
+            {editable ? (
+              <>
+                <Button shape="round" type="primary" onClick={onSubmit}>提交</Button>
+                <Button shape="round" onClick={changeEditable}>取消</Button>
+              </>
+            ) :
+              <Button shape="round" type="primary" onClick={changeEditable}>编辑</Button>
+            }
+            <Button type="link" danger onClick={onDelete}>删除</Button>
+            <Dropdown trigger={['click']} placement="bottomRight" overlay={(
+              <Menu>
+                <Menu.Item key="1" icon={<AreaIcon />}><AreaAddModel parentId={props.areaId} title="子区域"/></Menu.Item>
+                <Menu.Item key="2" icon={<EnterChannelIcon />}>入口通道</Menu.Item>
+                <Menu.Item key="3" icon={<ExitChannelIcon />}>出口通道</Menu.Item>
+              </Menu>
+            )}><Button type="primary" icon={<PlusOutlined />} style={{ backgroundColor: '#92C110', borderColor: '#92C110' }}></Button></Dropdown>
+          </Space>
+        </Access>
+      }
+    >
+      <ProDescriptions.Item label={<DescLabel title="区域类型" />} valueType="select" valueEnum={{
+        1: { text: '停车场' },
+        2: { text: '外区域' },
+        3: { text: '内区域' },
+      }} editable={false} dataIndex="areaType" key="areaType">
+      </ProDescriptions.Item>
+      <ProDescriptions.Item label={<DescLabel title="区域名称" />} dataIndex="areaName" key="areaName" formItemProps={{
+        rules: [{ required: true, whitespace: true, message: '此项是必填项' },],
+      }} valueType="text">
+      </ProDescriptions.Item>
+      <ProDescriptions.Item label={<DescLabel title="是否收费" />} dataIndex="whetherCharge" key="whetherCharge" valueType="select"
+        valueEnum={{ 'false': { text: '不收费', status: 'Success' }, 'true': { text: '收费', status: 'Error' }, }}
+        formItemProps={{
+          rules: [{ required: true, message: '此项是必填项' },],
+          initialValue: 1
+        }}
+      >
+      </ProDescriptions.Item>
+
+      {/* 普通区域 */}
+      {area?.areaType !== 1 && (
+        <>
+          <ProDescriptions.Item label={<DescLabel title="公共临时车位总数" />} valueType="digit" dataIndex="temporaryQuantities" key="temporaryQuantities"
+            formItemProps={{
+              rules: [{ required: true, message: '此项是必填项' }],
+              initialValue: 0
             }}
-            editable={{
-                form: form
+          >
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label={<DescLabel title="公共月租车位总数" />} valueType="digit" dataIndex="fixedQuantities" key="fixedQuantities"
+            formItemProps={{
+              rules: [{ required: true, message: '此项是必填项' }],
+              initialValue: 0
             }}
-            column={1}
-            title="高级定义列表" tooltip="包含了从服务器请求，columns等功能"
-        >
-            <ProDescriptions.Item label="文本" valueType="option">
-                <Button key="primary" type="primary" onClick={onReset}>
-                    提交
-                </Button>
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="区域类型" valueType="select" valueEnum={{
-                1: { text: '停车场' },
-                2: { text: '外区域' },
-                3: { text: '内区域' },
-            }} editable={false}>
-                {area?.areaType}
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="区域名称" formItemProps={{
-                rules: [
-                    {
-                        required: true,
-                        whitespace: true,
-                        message: '此项是必填项',
-                    },
-                ],
-            }} valueType="text">
-                {area?.areaName}
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="百分比" valueType="percent"
-                formItemProps={{
-                    rules: [
-                        {
-                            required: true,
-                            whitespace: true,
-                            message: '此项是必填项',
-                        },
-                    ],
-                }}>
-                100
-            </ProDescriptions.Item>
-            <ProDescriptions.Item
-                label="选择框"
-                valueEnum={{
-                    all: { text: '全部', status: 'Default' },
-                    open: {
-                        text: '未解决',
-                        status: 'Error',
-                    },
-                    closed: {
-                        text: '已解决',
-                        status: 'Success',
-                    },
-                    processing: {
-                        text: '解决中',
-                        status: 'Processing',
-                    },
-                }}
-            >
-                open
-            </ProDescriptions.Item>
-            <ProDescriptions.Item
-                label="远程选择框"
-                request={async () => [
-                    { label: '全部', value: 'all' },
-                    { label: '未解决', value: 'open' },
-                    { label: '已解决', value: 'closed' },
-                    { label: '解决中', value: 'processing' },
-                ]}
-            >
-                closed
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="进度条" valueType="progress">
-                40
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="日期时间" valueType="dateTime">
-                {moment().valueOf()}
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="日期" valueType="date">
-                {moment().valueOf()}
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="日期区间" valueType="dateTimeRange">
-                {[moment().add(-1, 'd').valueOf(), moment().valueOf()]}
-            </ProDescriptions.Item>
-            <ProDescriptions.Item label="时间" valueType="time">
-                {moment().valueOf()}
-            </ProDescriptions.Item>
-        </ProDescriptions>
-    )
+          >
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label={<DescLabel title="专用私有车位总数" />} valueType="digit" dataIndex="specialQuantities" key="specialQuantities"
+            formItemProps={{
+              rules: [{ required: true, message: '此项是必填项' }],
+              initialValue: 0
+            }}
+          >
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label={<DescLabel title="记录创建人" />} valueType="text" editable={false}>
+            {area?.createdUser}
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label={<DescLabel title="记录创建时间" />} valueType="text" editable={false}>
+            {area?.createdTime}
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label={<DescLabel title="记录最后修改人" />} valueType="text" editable={false}>
+            {area?.lastUpdateUser}
+          </ProDescriptions.Item>
+          <ProDescriptions.Item label={<DescLabel title="记录最后修改时间" />} valueType="text" editable={false}>
+            {area?.lastUpdateTime}
+          </ProDescriptions.Item>
+        </>
+      )}
+    </ProDescriptions>
+  )
 }
 
 export {
-    AreaShow,
+  AreaShow,
 }

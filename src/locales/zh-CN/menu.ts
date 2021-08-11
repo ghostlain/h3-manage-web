@@ -53,4 +53,9 @@ export default {
   'menu.basic-config': '车场配置',
   'menu.basic-config.parking': '车场结构',
   'menu.basic-config.equipment': '设备管理',
+  'menu.basic-config.terminal': '值守终端',
+
+  'menu.sysuser': '系统用户',
+  'menu.sysuser.role': '角色管理',
+  'menu.sysuser.manage': '用户管理',
 };

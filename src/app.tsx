@@ -115,17 +115,31 @@ export const layout: RunTimeLayoutConfig = ({ initialState }) => {
     },
     links: isDev
       ? [
-          <Link to="/umi/plugin/openapi" target="_blank">
-            <LinkOutlined />
-            <span>openAPI 文档</span>
-          </Link>,
-          <Link to="/~docs">
-            <BookOutlined />
-            <span>业务组件文档</span>
-          </Link>,
-        ]
+        <Link to="/umi/plugin/openapi" target="_blank">
+          <LinkOutlined />
+          <span>openAPI 文档</span>
+        </Link>,
+        <Link to="/~docs">
+          <BookOutlined />
+          <span>业务组件文档</span>
+        </Link>,
+      ]
       : [],
     menuHeaderRender: undefined,
+    menuItemRender: (menuItemProps, defaultDom) => {
+      // 二级菜单显示图标
+      // https://github.com/ant-design/ant-design-pro/issues/7765
+      if (menuItemProps.isUrl || !menuItemProps.path) {
+        return defaultDom;
+      }
+
+      return (
+        <Link to={menuItemProps.path}>
+          {menuItemProps.pro_layout_parentKeys && menuItemProps.pro_layout_parentKeys.length > 0 &&
+            menuItemProps.icon}{defaultDom}
+        </Link>
+      );
+    },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     ...initialState?.settings,

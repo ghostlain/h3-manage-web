@@ -10,8 +10,7 @@ import { AreaShow } from './components/Area';
 import type { DataNode, EventDataNode } from 'antd/lib/tree';
 
 function converToTreeNode(area: API.AreaNode) {
-  const switcherIcon: JSX.Element = area.areaType === 1 ?
-    <ParkingIcon /> : <AreaIcon />; // 子区域
+  const icon: JSX.Element = area.areaType === 1 ? <ParkingIcon /> : <AreaIcon />; // 子区域
   const subAreas = area.areas;
   const children: any[] = [];
 
@@ -27,7 +26,7 @@ function converToTreeNode(area: API.AreaNode) {
       children.push({
         title: c.channelName,
         key: `channel_${c.id}`,
-        switcherIcon: <EnterChannelIcon />,
+        icon: <EnterChannelIcon />,
       });
     });
   }
@@ -38,7 +37,7 @@ function converToTreeNode(area: API.AreaNode) {
       children.push({
         title: c.channelName,
         key: `channel_${c.id}`,
-        switcherIcon: <ExitChannelIcon />,
+        icon: <ExitChannelIcon />,
       });
     });
   }
@@ -46,7 +45,7 @@ function converToTreeNode(area: API.AreaNode) {
   return {
     title: area.areaName,
     key: `area_${area.id}`,
-    switcherIcon,
+    icon,
     children,
   };
 }
@@ -96,7 +95,8 @@ const Parking: React.FC = () => {
     <PageHeaderWrapper content="配置基本参数">
       <ProCard split="vertical" style={{
         minHeight: '500px'
-      }}>
+      }}
+      >
         <ProCard
           title="车场结构"
           colSpan="30%"
@@ -105,6 +105,7 @@ const Parking: React.FC = () => {
             <Tree
               treeData={tree.map(a => converToTreeNode(a))}
               showLine
+              showIcon
               defaultExpandAll
               onSelect={onSelect}
             />
@@ -116,7 +117,17 @@ const Parking: React.FC = () => {
         <ProCard>
           {right && (
             right.type === 'area' ? (
-              <AreaShow areaId={right.id} onChanged={refreshTree}/>
+              <AreaShow areaId={right.id} onChanged={(id, type) => {
+                refreshTree();
+                if (type === 'deleted') {
+                  // 删除了区域，右边显示区域要置空
+                  setRight(undefined);
+                } else if (type === 'addNewChannel') {
+                  setRight({ type: 'channel', id })
+                } else {
+                  setRight({ type: 'area', id })
+                }
+              }} />
             ) : (
               <span>Wait!</span>
             )

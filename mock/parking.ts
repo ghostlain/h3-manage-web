@@ -37,8 +37,8 @@ const areas = {
     areaName: '红门工业园',
     areaLevel: 1,
     areaType: 1,
-    whetherCharge: true,
-    temporaryQuantities: 100,
+    whetherCharge: 'true',
+    temporaryQuantities: 0,
     fixedQuantities: 0,
     specialQuantities: 0,
     truckQuantities: 0,
@@ -55,9 +55,9 @@ const areas = {
     areaName: '外区',
     areaLevel: 1,
     areaType: 2,
-    whetherCharge: true,
+    whetherCharge: 'true',
     temporaryQuantities: 100,
-    fixedQuantities: 0,
+    fixedQuantities: 1,
     specialQuantities: 0,
     truckQuantities: 0,
     createdTime: '2021-01-01 11:00:00',
@@ -99,13 +99,22 @@ const areas = {
 export default {
   'GET /api/parking/get': (req: Request, res: Response) => {
     res.send({
+      code: 0,
       data: Park
     })
   },
   'GET /api/parking/area/1': {
+    code: 0,
     data: areas[1],
   },
   'GET /api/parking/area/2': {
+    code: 0,
     data: areas[2],
+  },
+  'POST /api/parking/area/2': {
+    code: 0,
+  },
+  'DELETE /api/parking/area/2': {
+    code: 0,
   },
 }

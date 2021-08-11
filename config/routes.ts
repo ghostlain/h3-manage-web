@@ -1,4 +1,4 @@
-﻿export default [
+export default [
   {
     path: '/user',
     layout: false,
@@ -25,7 +25,7 @@
     path: '/admin',
     name: 'admin',
     icon: 'crown',
-    access: 'canAdmin',
+    access: 'routeFilter',
     component: './Admin',
     routes: [
       {
@@ -37,21 +37,51 @@
     ],
   },
   {
+    path: '/sysuser',
+    name: 'sysuser',
+    icon: 'user',
+    access: 'routeFilter',
+    routes: [
+      {
+        path: '/sysuser/role',
+        name: 'role',
+        icon: 'folder-view',
+        component: './SysUserRole',
+      },
+      {
+        path: '/sysuser/manage',
+        name: 'manage',
+        icon: 'user-add',
+        component: './SysUser',
+      },
+    ],
+  },
+  {
     path: '/basic-config',
     name: 'basic-config',
-    icon: 'crown',
+    icon: 'setting',
+    access: 'routeFilter',
     routes: [
       {
         path: '/basic-config/parking',
         name: 'parking',
-        icon: 'smile',
+        icon: 'partition',
+        access: 'routeFilter',
         component: './Parking',
       },
       {
         name: 'equipment',
-        icon: 'smile',
+        icon: 'video-camera-add',
         path: '/basic-config/equipment',
+        access: 'routeFilter',
         component: './Equipment',
+      },
+      {
+        name: 'terminal',
+        icon: 'smile',
+        path: '/basic-config/terminal',
+        access: 'routeFilter',
+        component: './Terminal',
       },
     ],
   },
