@@ -1,6 +1,3 @@
-// @ts-ignore
-/* eslint-disable */
-
 declare namespace API {
   type CurrentUser = {
     name?: string;
@@ -27,10 +24,17 @@ declare namespace API {
     type?: string;
   };
 
-  type ApiResponse<T = any> = {
-    code: number;
-    msg?: string;
-    data?: T;
+  type SysRole = {
+    roleId: string;
+    roleName: string;
+    roleSign: string;
+    remark?: string;
+    creator: string;
+    gmtCreate: number;
+    deletable: boolean;
+  }
+
+  type SysUserAuthority = {
   }
 }
 

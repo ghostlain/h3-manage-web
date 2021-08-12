@@ -6,3 +6,12 @@ export async function currentUser(options?: Record<string, any>) {
     ...(options || {}),
   });
 }
+
+
+
+export async function listRoles(options?: Record<string, any>) {
+  return request<API.ApiResponse<API.SysRole[]>>('/api/sysRole/list', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}

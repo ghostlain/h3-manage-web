@@ -1,5 +1,5 @@
 import ProDescriptions from "@ant-design/pro-descriptions";
-import { Button, Dropdown, Form, Menu, message, Space } from "antd";
+import { Button, Dropdown, Form, Menu, message, Space, Tooltip } from "antd";
 import { useEffect } from "react";
 import { deleteAreaById, getAreaById, updateArea } from "@/services/parking/api";
 import { useState } from "react";
@@ -20,6 +20,16 @@ const DescLabel: React.FC<{ title: string }> = (props) => {
   return (
     <span className={styles.descLabel}>{props.title}</span>
   )
+}
+
+function areaTypeToString(areaType: API.AreaType) {
+  if (areaType === 1) {
+    return '停车场';
+  } if (areaType === 2) {
+    return '外区域';
+  }
+
+  return '内区域';
 }
 
 const AreaShow: React.FC<AreaShowProps> = (props) => {
@@ -96,7 +106,7 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
       const { areaId } = props;
       const response = await deleteAreaById(areaId)
       if (response.code === 0) {
-        message.error('删除区域成功!');
+        message.success('删除区域成功!');
         props.onChanged(areaId, 'deleted');
         return;
       }
@@ -104,6 +114,11 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
     } catch (error) {
       message.error(`删除区域失败!${error}`);
     }
+  }
+
+  const onAddArea = async (formData: Record<string, any>) => {
+    console.log(formData)
+    return true;
   }
 
   return (
@@ -115,7 +130,44 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
       } : undefined}
       column={1}
       loading={loading}
-      title="区域描述"
+      title={(
+        <Space>
+          {area && areaTypeToString(area.areaType)}—<span className={styles.rightContentTitle}>{area?.areaName}</span>
+          <Access accessible={access.hasAuthority('parking.modify')}>
+            <Dropdown trigger={['click']} placement="bottomRight" overlay={(
+              <Menu>
+                <Menu.Item key="1" icon={<AreaIcon />}>
+                  <AreaAddModel title={(
+                    <><span style={{ color: '#92C110' }}>{area?.areaName} </span>的子区域</>
+                  )} trigger={<span>子区域</span>} parentId={props.areaId} />
+                </Menu.Item>
+                {area?.areaType === 1 ? (
+                  // 停车场
+                  <Menu.Item key="4" icon={<ParkingIcon />}>
+                    <AreaAddModel title={(
+                      <><span style={{ color: '#92C110' }}>{area?.areaName} </span>的平级停车场</>
+                    )} trigger={<span>平级停车场</span>} parentId={area?.parentId || 0} /></Menu.Item>
+                ) : (
+                  // 区域
+                  <>
+                    <Menu.Item key="2" icon={<EnterChannelIcon />}>入口通道</Menu.Item>
+                    <Menu.Item key="3" icon={<ExitChannelIcon />}>出口通道</Menu.Item>
+                    <Menu.Item key="5" icon={<AreaIcon />}>
+                      <AreaAddModel title={(
+                        <><span style={{ color: '#92C110' }}>{area?.areaName} </span>的平级区域</>
+                      )} trigger={<span>平级区域</span>} parentId={area?.parentId || 0} onFinish={onAddArea} /></Menu.Item>
+                  </>
+                )}
+              </Menu>
+            )}>
+              <Tooltip title="新增区域通道等">
+                <Button type="primary" icon={<PlusOutlined />} size="small"
+                  style={{ backgroundColor: '#92C110', borderColor: '#92C110' }} />
+              </Tooltip>
+            </Dropdown>
+          </Access>
+        </Space>
+      )}
       dataSource={area}
       extra={
         <Access accessible={access.hasAuthority('parking.modify')}>
@@ -129,32 +181,7 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
               <Button shape="round" type="primary" onClick={changeEditable}>编辑</Button>
             }
             <Button type="link" danger onClick={onDelete}>删除</Button>
-            <Dropdown trigger={['click']} placement="bottomRight" overlay={(
-              <Menu>
-                <Menu.Item key="1" icon={<AreaIcon />}>
-                  <AreaAddModel title={(
-                    <><span style={{ color: '#92C110' }}>{area?.areaName}</span>的子区域</>
-                  )} trigger={<span>子区域</span>} parentId={props.areaId} />
-                </Menu.Item>
-                {area?.areaType === 1 ? (
-                  // 停车场
-                  <Menu.Item key="4" icon={<ParkingIcon />}>
-                    <AreaAddModel title={(
-                      <><span style={{ color: '#92C110' }}>{area?.areaName}</span>的平级停车场</>
-                    )} trigger={<span>平级停车场</span>} parentId={area?.parentId || 0} /></Menu.Item>
-                ) : (
-                  // 区域
-                  <>
-                    <Menu.Item key="2" icon={<EnterChannelIcon />}>入口通道</Menu.Item>
-                    <Menu.Item key="3" icon={<ExitChannelIcon />}>出口通道</Menu.Item>
-                    <Menu.Item key="5" icon={<AreaIcon />}>
-                      <AreaAddModel title={(
-                        <><span style={{ color: '#92C110' }}>{area?.areaName}</span>的平级区域</>
-                      )} trigger={<span>平级区域</span>} parentId={area?.parentId || 0}/></Menu.Item>
-                  </>
-                )}
-              </Menu>
-            )}><Button type="primary" icon={<PlusOutlined />} style={{ backgroundColor: '#92C110', borderColor: '#92C110' }}></Button></Dropdown>
+
           </Space>
         </Access>
       }
@@ -172,7 +199,7 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
       <ProDescriptions.Item label={<DescLabel title="是否收费" />} dataIndex="whetherCharge" key="whetherCharge" valueType="select"
         valueEnum={{ 'false': { text: '不收费', status: 'Success' }, 'true': { text: '收费', status: 'Error' }, }}
         formItemProps={{
-          rules: [{ required: true, message: '此项是必填项' },],
+          rules: [{ required: true },],
           initialValue: 1
         }}
       >
@@ -183,21 +210,21 @@ const AreaShow: React.FC<AreaShowProps> = (props) => {
         <>
           <ProDescriptions.Item label={<DescLabel title="公共临时车位总数" />} valueType="digit" dataIndex="temporaryQuantities" key="temporaryQuantities"
             formItemProps={{
-              rules: [{ required: true, message: '此项是必填项' }],
+              rules: [{ required: true }],
               initialValue: 0
             }}
           >
           </ProDescriptions.Item>
           <ProDescriptions.Item label={<DescLabel title="公共月租车位总数" />} valueType="digit" dataIndex="fixedQuantities" key="fixedQuantities"
             formItemProps={{
-              rules: [{ required: true, message: '此项是必填项' }],
+              rules: [{ required: true }],
               initialValue: 0
             }}
           >
           </ProDescriptions.Item>
           <ProDescriptions.Item label={<DescLabel title="专用私有车位总数" />} valueType="digit" dataIndex="specialQuantities" key="specialQuantities"
             formItemProps={{
-              rules: [{ required: true, message: '此项是必填项' }],
+              rules: [{ required: true }],
               initialValue: 0
             }}
           >

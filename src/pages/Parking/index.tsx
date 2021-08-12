@@ -86,13 +86,15 @@ const Parking: React.FC = () => {
     if (sType === 'channel' || sType === 'area') {
       setRight({
         type: sType,
-        id: parseInt(id)
+        id: parseInt(id, 10)
       })
     }
   };
 
   return (
-    <PageHeaderWrapper content="配置基本参数">
+    <PageHeaderWrapper content="配置基本参数" extraContent={(
+      <>test</>
+    )}>
       <ProCard split="vertical" style={{
         minHeight: '500px'
       }}
